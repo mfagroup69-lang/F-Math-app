@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حل المعادلات من الدرجة الثانية</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color:  #fff7f0;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        direction: rtl;
+        text-align: center;
+    }
+    h1 {
+        color: #ff8800;
+        margin-bottom: 20px;
+    }
+    .container {
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+        border: 2px solid #ff8800;
+        border-radius: 10px;
+        box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+        background-color: #fff8f0;
+    }
+    input[type=number], select {
+        width: 80%;
+        padding: 10px;
+        margin: 5px 0 15px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    button {
+        width: 100%;
+        padding: 10px;
+        background-color: #ff8800;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        margin-bottom: 10px;
+    }
+    button:hover {
+        background-color: #ff8800;
+    }
+    .back-btn {
+        display: inline-block;
+        padding: 10px 25px;
+        background-color: #ff7b00;
+        color: white;
+        text-decoration: none;
+        border-radius: 25px;
+        font-size: 16px;
+        margin-top: 10px;
+    }
+    .back-btn:hover {
+        background-color: #ff9b3d;
+    }
+    .result {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #fff3e0;
+        text-align: right;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    table, th, td {
+        border: 1px solid #aaa;
+    }
+    th, td {
+        text-align: center;
+        padding: 5px;
+    }
+	.row{display:flex;gap:8px;margin-top:12px}
+</style>
+</head>
+<body>
+
+<h1>حل المعادلات من الدرجة الثانية</h1>
+<div class="container">
+    <label>أدخل المعاملات:</label>
+    <input type="number" id="a" placeholder="a">
+    <input type="number" id="b" placeholder="b">
+    <input type="number" id="c" placeholder="c">
+
+    <button onclick="solve()">حل بطريقة دلتا</button>
+
+    <div class="result" id="result"></div>
+	  <div class="row">
+      <button onclick="clearAll()" style="background:#007BFF">مسح</button>
+      <button onclick="window.open('https://youtu.be/FILXAuLPrAw?si=a_WMno5YrdFWQtUA', '_blank')" style="background:#007BFF">لم افهم</button>
+	  </div>
+
+
+    <a href="c.html" class="back-btn">⬅️ رجوع</a>
+</div>
+
+<script>
+function solve() {
+    const a = parseFloat(document.getElementById('a').value);
+    const b = parseFloat(document.getElementById('b').value);
+    const c = parseFloat(document.getElementById('c').value);
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = '';
+
+    if (isNaN(a) || isNaN(b) || isNaN(c)) {
+        resultDiv.innerHTML = `<p>الرجاء إدخال جميع المعاملات.</p>`;
+        return;
+    }
+
+    if (a === 0) {
+        resultDiv.innerHTML = `<p>المعامل a يجب أن لا يساوي صفر.</p>`;
+        return;
+    }
+
+    // حساب دلتا
+    const delta = b*b - 4*a*c;
+    let html = `<p>1️⃣ حساب دلتا: Δ = b² - 4ac = ${b}² - 4*${a}*${c} = ${delta}</p>`;
+
+    if (delta < 0) {
+        html += `<p>❌ لا توجد حلول حقيقية لأن دلتا < 0</p>`;
+    } else if (delta === 0) {
+        const x = -b/(2*a);
+        html += `<p>2️⃣ حساب الجذر الوحيد: x = -b / (2a) = -${b} / (2*${a}) = ${x}</p>`;
+    } else {
+        const sqrtDelta = Math.sqrt(delta);
+        const x1 = (-b + sqrtDelta)/(2*a);
+        const x2 = (-b - sqrtDelta)/(2*a);
+        html += `<p>2️⃣ حساب الجذور:</p>`;
+        html += `<p>x₁ = (-b + √Δ) / (2a) = (-${b} + √${delta}) / (2*${a}) = ${x1}</p>`;
+        html += `<p>x₂ = (-b - √Δ) / (2a) = (-${b} - √${delta}) / (2*${a}) = ${x2}</p>`;
+    }
+
+    resultDiv.innerHTML = html;
+}
+function clearAll() {
+    document.getElementById('a').value = '';
+    document.getElementById('b').value = '';
+    document.getElementById('c').value = '';
+    document.getElementById('result').innerHTML = '';
+    document.getElementById('note').style.display = 'none';
+}
+</script>
+
+</body>
+</html>

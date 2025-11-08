@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>التحقق من الجذر</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Tajawal', sans-serif;
+    }
+
+    body {
+      background-color: #fff7f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 20px;
+    }
+
+    header {
+      width: 100%;
+      background-color: #ff8800;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      border-radius: 0 0 20px 20px;
+      font-size: 20px;
+      font-weight: bold;
+      position: relative;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+   	.row{display:flex;gap:8px;margin-top:12px}
+
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+      margin-top: 30px;
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      color: #ff8800;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #ff8800;
+      border-radius: 10px;
+      outline: none;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    button {
+      width: 100%;
+      background-color: #ff8800;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #e06f00;
+    }
+
+    .result {
+      margin-top: 20px;
+      background-color: #fff3e6;
+      border-radius: 15px;
+      padding: 15px;
+      line-height: 1.6;
+      border: 1px solid #ffb87a;
+    }
+
+    .highlight {
+      color: #ff8800;
+      font-weight: bold;
+    }
+
+    footer {
+      margin-top: 25px;
+      text-align: center;
+    }
+
+    .help-btn {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 25px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .help-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    التحقق من أن العدد جذر
+    <button class="row" onclick="goBack()">رجوع</button>
+  </header>
+
+  <!-- 🟠 الصفحة الرئيسية -->
+  <div class="container" id="mainContainer">
+    <h2>تحقق من الجذر</h2>
+    <input type="text" id="polyInput" placeholder="أدخل كثيرة الحدود (مثال: x^2 - 3x + 2)">
+    <input type="number" id="aInput" placeholder="أدخل العدد a">
+    <button onclick="checkRoot()">تحقق</button>
+
+    <div class="result" id="resultBox"></div>
+  </div>
+
+  <footer>
+    <button class="help-btn" onclick="window.location.href='https://youtu.be/Z9b0dj-xUjA?si=oQPGFPm1A9sf3gWr'">لم أفهم</button>
+  </footer>
+
+  <script>
+    function goBack() {
+      window.history.back();
+    }
+
+    function checkRoot() {
+      const poly = document.getElementById("polyInput").value.trim();
+      const a = parseFloat(document.getElementById("aInput").value);
+      const resultBox = document.getElementById("resultBox");
+
+      if (!poly || isNaN(a)) {
+        resultBox.innerHTML = "<p style='color:red;'>⚠️ الرجاء إدخال كثيرة الحدود والعدد a.</p>";
+        return;
+      }
+
+      try {
+        const expr = poly.replace(/x/g, `(${a})`).replace(/\^/g, "**");
+        const value = eval(expr);
+
+        let steps = `
+          <p><span class='highlight'>الخطوة 1:</span> نكتب f(x) = ${poly}</p>
+          <p><span class='highlight'>الخطوة 2:</span> نحسب f(${a}) = ${poly.replace(/x/g, `(${a})`)}</p>
+          <p><span class='highlight'>الخطوة 3:</span> بالتعويض نجد f(${a}) = ${value}</p>
+        `;
+
+        if (value === 0) {
+          steps += `<p><span class='highlight'>النتيجة:</span> ✅ العدد ${a} هو جذر لكثيرة الحدود.</p>`;
+        } else {
+          steps += `<p><span class='highlight'>النتيجة:</span> ❌ العدد ${a} ليس جذراً (لأن f(${a}) ≠ 0).</p>`;
+        }
+
+        resultBox.innerHTML = steps;
+      } catch (e) {
+        resultBox.innerHTML = "<p style='color:red;'>⚠️ هناك خطأ في كتابة كثيرة الحدود.</p>";
+      }
+    }
+  </script>
+
+</body>
+</html>

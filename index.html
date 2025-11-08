@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>صفحة التشغيل</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Tajawal', sans-serif;
+    }
+
+    body {
+      background-color: #ffffff;
+      color: #333;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      flex-direction: column;
+    }
+
+    /* الفيديو */
+  #videoContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: auto;
+  background: transparent; /* 🔹 أزلنا الخلفية السوداء */
+  margin-top: 20vh; /* ليكون الفيديو أسفل قليلًا */
+}
+
+
+    #introVideo {
+      width: 90%;
+      max-width: 500px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    /* صفحة الشروط */
+    #privacyScreen {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background-color: #fff7f0;
+      color: #333;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 20px;
+    }
+
+    #privacyBox {
+      background: white;
+      border: 2px solid #ffa94d;
+      border-radius: 20px;
+      padding: 20px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      color: #d86b00;
+      margin-bottom: 10px;
+      font-size: 20px;
+    }
+
+    p {
+      font-size: 15px;
+      line-height: 1.6;
+      text-align: justify;
+      color: #555;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    button {
+      background-color: #ff8800;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      padding: 10px 30px;
+      margin-top: 20px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background-color: #e06f00;
+    }
+
+    @media (max-width: 600px) {
+      #introVideo {
+        width: 95%;
+        max-width: 350px;
+      }
+
+      p {
+        font-size: 14px;
+      }
+
+      h2 {
+        font-size: 18px;
+      }
+
+      button {
+        font-size: 15px;
+        padding: 8px 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- الفيديو -->
+  <div id="videoContainer">
+    <video id="introVideo" autoplay playsinline muted>
+      <source src="p.mp4" type="video/mp4">
+      متصفحك لا يدعم تشغيل الفيديو.
+    </video>
+  </div>
+
+  <!-- صفحة الشروط -->
+  <div id="privacyScreen">
+    <div id="privacyBox">
+      <h2>سياسة الخصوصية وشروط الاستخدام</h2>
+      <p>
+        أ. نحن غير مسؤولين عن أي استعمال غير قانوني للتطبيق مثل الغش في الامتحانات.<br><br>
+        ب. التطبيق تم تطويره بلغات برمجة أجنبية ويعتمد على برامج تعليمية خارجية، لذا قد تختلف بعض طرق الحل.<br><br>
+        F.M.A Group© كل الحقوق محفوظة.
+      </p>
+      <button id="agreeBtn">موافق</button>
+    </div>
+  </div>
+
+  <script>
+    const video = document.getElementById('introVideo');
+    const privacyScreen = document.getElementById('privacyScreen');
+    const agreeBtn = document.getElementById('agreeBtn');
+    const videoContainer = document.getElementById('videoContainer');
+
+    // عند انتهاء الفيديو تظهر صفحة الشروط
+    video.addEventListener('ended', () => {
+      videoContainer.style.display = 'none';
+      privacyScreen.style.display = 'flex';
+    });
+
+    // عند الضغط على موافق
+    agreeBtn.addEventListener('click', () => {
+      window.location.href = "index.html";
+    });
+  </script>
+
+</body>
+</html>

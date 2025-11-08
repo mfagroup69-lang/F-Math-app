@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تفكيك الدالة</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Tajawal',sans-serif}
+    body{background:#fff7f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px}
+    header{width:100%;background:#ff8800;color:#fff;padding:14px;border-radius:0 0 18px 18px;text-align:center;position:relative;box-shadow:0 4px 8px rgba(0,0,0,0.12)}
+    .back-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:#007BFF;color:#fff;border:none;border-radius:18px;padding:6px 14px;cursor:pointer}
+    .container{width:100%;max-width:520px;margin-top:30px;background:#fff;border-radius:16px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    h2{color:#ff8800;text-align:center;margin-bottom:12px}
+    label{display:block;text-align:center;margin-bottom:8px;color:#444}
+    input[type="text"]{width:100%;padding:10px 12px;border:2px solid #ffb37a;border-radius:10px;font-size:16px;text-align:center}
+    .row{display:flex;gap:8px;margin-top:12px}
+    button{flex:1;background:#ff8800;color:#fff;border:none;border-radius:12px;padding:10px;font-size:16px;font-weight:700;cursor:pointer}
+    button:hover{background:#e06f00}
+    .result{margin-top:16px;background:#fff3e6;border-radius:10px;padding:12px;line-height:1.6;color:#333;white-space:pre-wrap}
+    footer{width:100%;max-width:520px;margin-top:18px;text-align:center}
+    .help-btn{background:#007BFF;color:#fff;border:none;border-radius:18px;padding:10px 18px;font-weight:700;cursor:pointer}
+    .step-title{color:#d86b00;font-weight:800;margin-top:8px}
+  </style>
+</head>
+<body>
+  <header>
+    تفكيك الدالة
+    <button class="back-btn" onclick="goBack()">رجوع</button>
+  </header>
+
+  <div class="container">
+    <h2>أدخل الدالة f(x)</h2>
+    <label>أمثلة صحيحة: (2x+1)^2 , √(3x-2) , (x+1)/(x-2) , sin(2x)</label>
+    <input id="fn" type="text" placeholder="مثال: (2x+1)^2 أو √(3x-2)" />
+    <div class="row">
+      <button onclick="process()">تفكيك</button>
+      <button onclick="clearAll()" style="background:#007BFF">مسح</button>
+    </div>
+
+    <div id="result" class="result" style="display:none"></div>
+  </div>
+
+  <footer>
+    <button class="help-btn" onclick="window.location.href='https://youtu.be/mrpVUJmjydQ?si=76dXNuNwOmp3eJ9T'">لم أفهم</button>
+  </footer>
+
+  <script>
+    function goBack(){window.history.back()}
+
+    function process(){
+      const input = document.getElementById("fn").value.trim();
+      const resultDiv = document.getElementById("result");
+      resultDiv.style.display = "none";
+      resultDiv.innerHTML = "";
+
+      if(!input){
+        resultDiv.style.display="block";
+        resultDiv.innerText = "⚠️ الرجاء إدخال الدالة أولاً.";
+        return;
+      }
+
+      let s = input.replace(/\s+/g,'');
+      let out = "📘 تحليل تفكيك الدالة خطوة بخطوة:\n\n";
+
+      // 1️⃣ دالة مرفوعة لقوة
+      if(/\^/.test(s)){
+        const parts = s.split('^');
+        const base = parts[0].replace(/[()]/g,'');
+        const exp = parts[1];
+        out += "الخطوة 1: نلاحظ أن الدالة من الشكل f(x) = ("+base+")^"+exp+"\n";
+        out += "الخطوة 2: نعتبر u(x) = "+base+"\n";
+        out += "الخطوة 3: نكتب f(x) = u(x)^"+exp+"\n\n";
+        out += "✅ النتيجة النهائية:\n";
+        out += "u(x) = "+base+"\n";
+        out += "f(u) = u^"+exp+"\n";
+        show(out);
+        return;
+      }
+
+      // 2️⃣ دالة جذرية
+      if(s.includes('√') || s.includes('sqrt(')){
+        let inside = '';
+        if(s.includes('sqrt(')){
+          inside = s.match(/sqrt\((.*)\)/)[1];
+        } else {
+          inside = s.split('√')[1].replace(/[()]/g,'');
+        }
+        out += "الخطوة 1: نلاحظ أن الدالة تحتوي على جذر ⇒ دالة جذرية.\n";
+        out += "الخطوة 2: نعتبر u(x) = "+inside+"\n";
+        out += "الخطوة 3: نكتب f(x) = √u(x)\n\n";
+        out += "✅ النتيجة النهائية:\n";
+        out += "u(x) = "+inside+"\n";
+        out += "f(u) = √u\n";
+        show(out);
+        return;
+      }
+
+      // 3️⃣ دالة كسرية
+      if(s.includes('/')){
+        const [num,den] = s.split('/');
+        out += "الخطوة 1: نلاحظ أن الدالة كسرية.\n";
+        out += "الخطوة 2: نعتبر u(x) = "+den+"\n";
+        out += "الخطوة 3: نكتب f(x) = ("+num+") / u(x)\n\n";
+        out += "✅ النتيجة النهائية:\n";
+        out += "u(x) = "+den+"\n";
+        out += "f(u) = ("+num+") / u\n";
+        show(out);
+        return;
+      }
+
+      // 4️⃣ دوال مثل sin(2x) , cos(3x+1)
+      if(/sin|cos|tan|exp|ln/.test(s)){
+        const match = s.match(/(sin|cos|tan|exp|ln)\((.*)\)/);
+        if(match){
+          const type = match[1];
+          const inside = match[2];
+          out += "الخطوة 1: نلاحظ أن الدالة من الشكل "+type+"("+inside+")\n";
+          out += "الخطوة 2: نعتبر u(x) = "+inside+"\n";
+          out += "الخطوة 3: نكتب f(x) = "+type+"(u(x))\n\n";
+          out += "✅ النتيجة النهائية:\n";
+          out += "u(x) = "+inside+"\n";
+          out += "f(u) = "+type+"(u)\n";
+          show(out);
+          return;
+        }
+      }
+
+      // 5️⃣ الحالة العامة
+      out += "لم أتمكن من تصنيف الدالة تلقائيًا.\n";
+      out += "يرجى إدخال شكل بسيط مثل: (2x+1)^2 أو √(x-3) أو sin(2x)\n";
+      show(out);
+
+      function show(txt){
+        resultDiv.style.display="block";
+        resultDiv.innerText = txt;
+      }
+    }
+
+    function clearAll(){
+      document.getElementById('fn').value='';
+      const r = document.getElementById('result');
+      r.style.display='none';
+      r.innerText='';
+    }
+  </script>
+</body>
+</html>

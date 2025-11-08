@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>حساب مجموعة تعريف دالة</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Tajawal',sans-serif}
+    body{background:#fff7f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px}
+    header{width:100%;background:#ff8800;color:#fff;padding:14px;border-radius:0 0 18px 18px;text-align:center;position:relative;box-shadow:0 4px 8px rgba(0,0,0,0.12)}
+    .back-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:#007BFF;color:#fff;border:none;border-radius:18px;padding:6px 14px;cursor:pointer}
+    .container{width:100%;max-width:520px;margin-top:30px;background:#fff;border-radius:16px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+    h2{color:#ff8800;text-align:center;margin-bottom:12px}
+    label{display:block;text-align:center;margin-bottom:8px;color:#444}
+    input[type="text"]{width:100%;padding:10px 12px;border:2px solid #ffb37a;border-radius:10px;font-size:16px;text-align:center}
+    .row{display:flex;gap:8px;margin-top:12px}
+    button{flex:1;background:#ff8800;color:#fff;border:none;border-radius:12px;padding:10px;font-size:16px;font-weight:700;cursor:pointer}
+    button:hover{background:#e06f00}
+    .result{margin-top:16px;background:#fff3e6;border-radius:10px;padding:12px;line-height:1.6;color:#333;white-space:pre-wrap}
+    .step-title{color:#d86b00;font-weight:800;margin-top:8px}
+    .final{margin-top:12px;padding:10px;border-radius:10px;background:#fffbe9;border:1px solid #ffd5a8;font-weight:800;color:#b35400}
+    footer{width:100%;max-width:520px;margin-top:18px;text-align:center}
+    .help-btn{background:#007BFF;color:#fff;border:none;border-radius:18px;padding:10px 18px;font-weight:700;cursor:pointer}
+    @media(max-width:420px){header{font-size:16px}.container{padding:14px}}
+  </style>
+</head>
+<body>
+  <header>
+    حساب مجموعة تعريف دالة
+    <button class="back-btn" onclick="goBack()">رجوع</button>
+  </header>
+
+  <div class="container">
+    <h2>أدخل الدالة f(x)</h2>
+    <label>أمثلة صحيحة: <small>1/(x-3) ,  (2*x+1)/(x^2-4) , sqrt(x+2) , √(x^2-1) , (x+1)</small></label>
+    <input id="fn" type="text" placeholder="مثال: 1/(x-3)   أو   √(x+2)   أو   (2*x+1)/(x^2-4)" />
+    <div class="row">
+      <button onclick="process()">احسب</button>
+      <button onclick="clearAll()" style="background:#007BFF">مسح</button>
+    </div>
+
+    <div id="result" class="result" style="display:none"></div>
+  </div>
+
+  <footer>
+    <button class="help-btn" onclick="window.location.href='https://youtu.be/zZ6pYb8M644?si=dVGE-7l8eWbSAE3B'">لم أفهم</button>
+  </footer>
+
+  <script>
+    // ==== أدوات تحليلية بسيطة (خطّي/تربيعي) ====
+    function goBack(){window.history.back()}
+
+    function clean(s){ return s.replace(/\s+/g,'').replace(/÷/g,'/').replace(/×/g,'*').replace(/-/g,'-'); }
+
+    // يحاول استخراج متعدد حدود من تعبير نصي بسيط (ax^2 + bx + c)
+    function parsePolynomial(expr){
+      // نطهر الصيغ الشائعة: تحويل ^ إلى ^ كما هو (سنستخدم regex)
+      expr = expr.replace(/\^/g,'^');
+      // نجعل x^2 و x ظهور نمطي
+      // نجمع المعاملات عبر مطابقة أنماط: (±)digits? *? x^2, x, ثابت
+      let a = 0, b = 0, c = 0;
+      // أبسط معالجة: استبدال - بـ +- لتقسيم الحدود بسهولة
+      let s = expr.replace(/^\+/,'').replace(/-/g,'+-');
+      let parts = s.split('+').map(p=>p.trim()).filter(p=>p!=='');
+      parts.forEach(p=>{
+        if(/x\^2/.test(p)){
+          let coef = p.replace(/x\^2/,'') || '1';
+          if(coef==='-') coef='-1';
+          a += Number(coef);
+        } else if(/x(?!\^)/.test(p)){
+          let coef = p.replace(/x/,'') || '1';
+          if(coef==='-') coef='-1';
+          b += Number(coef);
+        } else {
+          c += Number(p||0);
+        }
+      });
+      return {a:a,b:b,c:c,degree: (Math.abs(a)>1e-12?2:(Math.abs(b)>1e-12?1: (Math.abs(c)>1e-12?0:0)))};
+    }
+
+    function solveLinear(a,b){
+      // ax + b = 0  => x = -b/a
+      if (Math.abs(a) < 1e-12) return null;
+      return -b / a;
+    }
+
+    function solveQuadratic(a,b,c){
+      const D = b*b - 4*a*c;
+      if (D < 0) return {D, realRoots: []};
+      const sqrtD = Math.sqrt(D);
+      const r1 = (-b - sqrtD) / (2*a);
+      const r2 = (-b + sqrtD) / (2*a);
+      return {D, realRoots: [r1,r2].sort((x,y)=>x-y)};
+    }
+
+    function formatNum(x){
+      if (Number.isInteger(x)) return x.toString();
+      return (Math.round(x*100000)/100000).toString();
+    }
+
+    // ==== المعالجة الرئيسية ====
+    function process(){
+      const raw = document.getElementById('fn').value;
+      const resultDiv = document.getElementById('result');
+      resultDiv.style.display='none';
+      resultDiv.innerHTML='';
+
+      if(!raw || raw.trim()===''){ resultDiv.style.display='block'; resultDiv.innerText='⚠️ الرجاء إدخال الدالة أولاً.'; return; }
+      const s = clean(raw);
+      let out = '';
+
+      // حالة: وجود كسر (نبحث عن آخر '/')
+      if(s.includes('/')){
+        // نفترض الشكل general: numerator/denominator  (قد توجد أقواس)
+        // نأخذ الجزء بعد آخر '/' كالمقام (تقريبيا صحيح لحالات شائعة)
+        const idx = s.lastIndexOf('/');
+        let denom = s.slice(idx+1);
+        let numer = s.slice(0,idx);
+        out += "الخطوة 1: التعرف على نوع الدالة\n";
+        out += "الدالة تحتوي على مقام => دالة كسرية.\n\n";
+
+        out += "الخطوة 2: شرط التعريف العام\n";
+        out += "لا يُسمح أن يكون المقام = 0.\n\n";
+
+        out += "الخطوة 3: نحدد المقام ونحل المعادلة المقام = 0\n";
+        out += "المقام المكتوب: " + denom + "\n\n";
+
+        // نحاول تحليل المقام كمق多 حدود خطّي أو تربيعي داخل أقواس أو بدون
+        // إذا كان المقام بين قوسين مثل (x^2-4) نزيل الأقواس
+        denom = denom.replace(/^\(+/,'').replace(/\)+$/,'');
+        const poly = parsePolynomial(denom);
+        if(poly.degree===1){
+          out += "تحليل المقام: متعدد حدود من الدرجة الأولى (خطّي).\n";
+          out += `المقام = ${poly.b}·x ${poly.c>=0?'+':''}${poly.c}\n`.replace('+-','-');
+          // لكن parsePolynomial يعطي ax^2 + bx + c ; عند الدرجة1: a=0, b !=0  => bx + c
+          const a = poly.b;
+          const c = poly.c;
+          const root = solveLinear(a,c);
+          if(root===null){
+            out += "لا يمكن حساب الجذر (معامل صفر). افحص التعبير يدوياً.\n";
+            out += "\nالنتيجة النهائية: مجموعة التعريف ℝ (غير مؤكد تلقائياً).";
+          } else {
+            out += `نحل ${a}x + ${c} = 0 → x = ${formatNum(root)}\n\n`;
+            out += "الخطوة 4: النتيجة النهائية\n";
+            out += `مجموعة التعريف: ℝ \\ { ${formatNum(root)} }\n`;
+            out = out.replace(/\+-/g,'-');
+          }
+        } else if(poly.degree===2){
+          out += "تحليل المقام: متعدد حدود من الدرجة الثانية (تربيعي).\n";
+          out += `المقام = ${poly.a}·x^2 ${poly.b>=0?'+':''}${poly.b}·x ${poly.c>=0?'+':''}${poly.c}\n`.replace('+-','-');
+          const quad = solveQuadratic(poly.a, poly.b, poly.c);
+          if(quad.realRoots.length===0){
+            out += `التمييز Δ = ${formatNum(quad.D)} < 0 → لا جذور حقيقية.\n`;
+            out += "إذًا المقام لا يساوي الصفر لأي x حقيقي.\n\n";
+            out += "النتيجة النهائية: مجموعة التعريف = ℝ\n";
+          } else if(quad.realRoots.length===1){
+            const r = quad.realRoots[0];
+            out += `التمييز Δ = ${formatNum(quad.D)} → جذر حقيقي مزدوج x = ${formatNum(r)}\n\n`;
+            out += `إذًا نستبعد x = ${formatNum(r)}\n`;
+            out += `مجموعة التعريف: ℝ \\ { ${formatNum(r)} }\n`;
+          } else {
+            const r1 = quad.realRoots[0], r2 = quad.realRoots[1];
+            out += `التمييز Δ = ${formatNum(quad.D)} → جذور حقيقية: x = ${formatNum(r1)} و x = ${formatNum(r2)}\n\n`;
+            out += `إذًا نستبعد القيمتين التي تصفر المقام: { ${formatNum(r1)} , ${formatNum(r2)} }\n`;
+            out += `مجموعة التعريف: ℝ \\ { ${formatNum(r1)} , ${formatNum(r2)} }\n`;
+          }
+        } else {
+          // لم نتعرف تلقائيا - نعطي قاعدة عامة ونطلب تبسيط
+          out += "لم أتمكن من تحليل المقام تلقائيًا إلى شكل خطّي/تربيعي موثوق.\n";
+          out += "مبدأيًا: حلّ المقام = 0 واعزل قيمه من مجموعة الأعداد الحقيقية.\n";
+          out += "النتيجة النهائية (عام): ℝ ما عدا قيم تجعل المقام = 0.\n";
+        }
+
+        // عرض النتيجة
+        resultDiv.style.display='block';
+        resultDiv.innerText = out;
+        return;
+      }
+
+      // حالة: جذر (√ أو sqrt)
+      if(s.includes('√') || /sqrt\(/i.test(s)){
+        // استخراج التعبير تحت الجذر
+        let rad = '';
+        if(/sqrt\(/i.test(s)){
+          // نأخذ داخل first sqrt(...)
+          const m = s.match(/sqrt\((.*)\)/i);
+          rad = m? m[1] : s.replace(/sqrt/i,'');
+        } else {
+          // علامة جذر "√" تليها مثلاً (x+2) أو x+2
+          const idx = s.indexOf('√');
+          rad = s.slice(idx+1);
+          rad = rad.replace(/^\(+/,'').replace(/\)+$/,'');
+        }
+        rad = rad.replace(/^\(+/,'').replace(/\)+$/,'');
+        out += "الخطوة 1: التعرف على نوع الدالة\n";
+        out += "الدالة تحتوي على جذر => دالة جذرية.\n\n";
+
+        out += "الخطوة 2: شرط التعريف\n";
+        out += "يجب أن يكون ما تحت الجذر ≥ 0.\n\n";
+
+        out += "الخطوة 3: نحل المتراجحة (ما تحت الجذر) ≥ 0\n";
+        out += "التعبير تحت الجذر: " + rad + "\n\n";
+
+        // نحاول تحليل radicand كمعدد حدود
+        const poly = parsePolynomial(rad);
+        if(poly.degree===1){
+          out += "تحليل ما تحت الجذر: متعدد حدود من الدرجة الأولى (خطّي).\n";
+          // forma bx + c >= 0  => x >= -c/b  إذا b>0  أو x <= -c/b إذا b<0
+          const b = poly.b, c = poly.c;
+          if(Math.abs(b) < 1e-12){
+            // يصبح ثابت
+            if(c >= 0){
+              out += `المتراجحة تصبح ${c} ≥ 0 وهي صحيحة دائماً.\n`;
+              out += "مجموعة التعريف: ℝ\n";
+            } else {
+              out += `المتراجحة تصبح ${c} ≥ 0 وهي خاطئة → لا يوجد x يُعرّف الدالة.\n`;
+              out += "مجموعة التعريف: ∅ (لا توجد قيم)\n";
+            }
+          } else {
+            const root = -c / b;
+            out += `نحل ${b}x + ${c} ≥ 0 → x ${b>0? '≥' : '≤'} ${formatNum(root)}\n\n`;
+            out += "الخطوة 4: النتيجة النهائية\n";
+            out += `مجموعة التعريف: { x ∈ ℝ | x ${b>0? '≥' : '≤'} ${formatNum(root)} }\n`;
+          }
+        } else if(poly.degree===2){
+          out += "تحليل ما تحت الجذر: متعدد حدود من الدرجة الثانية (تربيعي).\n";
+          out += `الشكل: ${poly.a}x^2 ${poly.b>=0?'+':''}${poly.b}x ${poly.c>=0?'+':''}${poly.c}\n\n`;
+          const quad = solveQuadratic(poly.a, poly.b, poly.c);
+          out += `نحسب التمييز Δ = b^2 - 4ac = ${formatNum(quad.D)}\n`;
+          if(quad.realRoots.length===0){
+            // إشارة عند a>0 فدائما موجبة → المجموعة R, إذا a<0 دائما سالبة -> no solution
+            if(poly.a>0){
+              out += "Δ < 0 و a > 0 → كثيرة الحدود موجبة دائما.\n";
+              out += "مجموعة التعريف: ℝ\n";
+            } else {
+              out += "Δ < 0 و a < 0 → كثيرة الحدود سالبة دائما → لا توجد قيمة تحقق ≥ 0.\n";
+              out += "مجموعة التعريف: ∅\n";
+            }
+          } else if(quad.realRoots.length===1){
+            const r = quad.realRoots[0];
+            out += `جذر مزدوج x = ${formatNum(r)}\n`;
+            if(poly.a>0){
+              out += "بما أن a > 0، كثيرة الحدود ≥ 0 لكل x وإمكانية يساوي صفر عند x = " + formatNum(r) + "\n";
+              out += "مجموعة التعريف: ℝ\n";
+            } else {
+              out += "بما أن a < 0، كثيرة الحدود ≤ 0 وتساوي صفر عند x = " + formatNum(r) + "\n";
+              out += "مجموعة التعريف: { " + formatNum(r) + " }\n";
+            }
+          } else {
+            const r1 = quad.realRoots[0], r2 = quad.realRoots[1];
+            out += `جذور المعادلة: x1 = ${formatNum(r1)} , x2 = ${formatNum(r2)}\n\n`;
+            // إذا a>0 => منحنى لأعلى => ≥0 على (-∞,r1] ∪ [r2,∞)
+            if(poly.a > 0){
+              out += "بما أن معامل x^2 موجب (a>0) فإن كثيرة الحدود ≥ 0 على:\n";
+              out += `(-∞ , ${formatNum(r1)}] ∪ [${formatNum(r2)} , ∞)\n`;
+              out += "مجموعة التعريف كما في الأعلى.\n";
+            } else {
+              out += "بما أن معامل x^2 سالب (a<0) فإن كثيرة الحدود ≥ 0 على:\n";
+              out += `[${formatNum(r1)} , ${formatNum(r2)}]\n`;
+              out += "مجموعة التعريف كما في الأعلى.\n";
+            }
+          }
+        } else {
+          out += "لم أستطع تحليل ما تحت الجذر تلقائيًا. مبدئيًا: حل المتراجحة (ما تحت الجذر) ≥ 0 يدوياً.\n";
+          out += "نتيجة عامة: جميع x التي تحقق هذا الشرط.\n";
+        }
+
+        resultDiv.style.display='block';
+        resultDiv.innerText = out;
+        return;
+      }
+
+      // الحالة العامة: لا مقام ولا جذر => غالبًا كثيرة حدود أو تعبير معرف على R
+      out += "الخطوة 1: فحص سريع\n";
+      out += "لا يوجد مقام ولا جذر واضح ⇒ غالبًا دالة معرفة على كل ℝ (مثل كثيرة حدود أو تعبير جبرى عادي).\n\n";
+      out += "الخطوة 2: النتيجة النهائية\n";
+      out += "مجموعة التعريف: ℝ\n";
+      resultDiv.style.display='block';
+      resultDiv.innerText = out;
+    }
+
+    function clearAll(){
+      document.getElementById('fn').value='';
+      const r = document.getElementById('result');
+      r.style.display='none';
+      r.innerText='';
+    }
+  </script>
+</body>
+</html>

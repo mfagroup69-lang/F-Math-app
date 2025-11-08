@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>حل المتراجحات من الدرجة الثانية</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #fff7f0;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        direction: rtl;
+        text-align: center;
+    }
+    h1 {
+        color: #ff8800;
+        margin-bottom: 20px;
+    }
+    .container {
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+        border: 2px solid #ff8800;
+        border-radius: 10px;
+        box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+        background-color: #fff8f0;
+    }
+    input[type=number] {
+        width: 70%;
+        padding: 10px;
+        margin: 5px 0 15px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    button {
+        width: 48%;
+        padding: 10px;
+        background-color: #ff8800;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        margin: 5px 1%;
+    }
+    button:hover {
+        background-color: #ff8800;
+    }
+    .youtube-btn {
+        background-color: #007BFF;
+    }
+    .youtube-btn:hover {
+        background-color: #0056b3;
+    }
+    .back-btn {
+        display: inline-block;
+        padding: 10px 25px;
+        background-color: #ff7b00;
+        color: white;
+        text-decoration: none;
+        border-radius: 25px;
+        font-size: 16px;
+        margin-top: 10px;
+    }
+    .back-btn:hover {
+        background-color: #ff9b3d;
+    }
+    .result {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #fff3e0;
+        text-align: right;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    table, th, td {
+        border: 1px solid #aaa;
+    }
+    th, td {
+        text-align: center;
+        padding: 5px;
+    }
+</style>
+</head>
+<body>
+
+<h1>حل المتراجحات من الدرجة الثانية</h1>
+<div class="container">
+    <label>أدخل المعاملات:</label>
+    <input type="number" id="a" placeholder="a">
+    <input type="number" id="b" placeholder="b">
+    <input type="number" id="c" placeholder="c">
+
+    <div>
+        <button onclick="solve()">حل المتراجحة</button>
+        <button onclick="clearAll()">مسح</button>
+    </div>
+    <div>
+        <button class="youtube-btn" onclick="window.open('https://youtu.be/MFBgxwvbz1w?si=BPsv70UYkSJjBTf6', '_blank')">لم أفهم</button>
+    </div>
+
+    <div class="result" id="result"></div>
+
+    <a href="c.html" class="back-btn">⬅️ رجوع</a>
+</div>
+
+<script>
+function solve() {
+    const a = parseFloat(document.getElementById('a').value);
+    const b = parseFloat(document.getElementById('b').value);
+    const c = parseFloat(document.getElementById('c').value);
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = '';
+
+    if (isNaN(a) || isNaN(b) || isNaN(c)) {
+        resultDiv.innerHTML = `<p>الرجاء إدخال جميع المعاملات.</p>`;
+        return;
+    }
+
+    if (a === 0) {
+        resultDiv.innerHTML = `<p>المعامل a يجب أن لا يساوي صفر.</p>`;
+        return;
+    }
+
+    // حساب دلتا
+    const delta = b*b - 4*a*c;
+    let roots = [];
+    if (delta > 0) {
+        const x1 = (-b + Math.sqrt(delta))/(2*a);
+        const x2 = (-b - Math.sqrt(delta))/(2*a);
+        roots = x1 < x2 ? [x1, x2] : [x2, x1];
+    } else if (delta === 0) {
+        roots = [-b/(2*a)];
+    }
+
+    let html = `<p>Δ = b² - 4ac = ${b}² - 4*${a}*${c} = ${delta}</p>`;
+
+    html += '<p>جدول الإشارة:</p><table><tr><th>فترات x</th><th>علامة f(x)</th></tr>';
+
+    let intervals = [];
+    if (roots.length === 0) {
+        const sign = a > 0 ? '+' : '-';
+        html += `<tr><td>∀ x</td><td>${sign}</td></tr>`;
+    } else if (roots.length === 1) {
+        intervals = [[-Infinity, roots[0]], [roots[0], Infinity]];
+    } else {
+        intervals = [[-Infinity, roots[0]], [roots[0], roots[1]], [roots[1], Infinity]];
+    }
+
+    intervals.forEach(interval => {
+        const mid = (interval[0] === -Infinity ? interval[1]-1 : (interval[0] + interval[1])/2);
+        const sign = a*mid*mid + b*mid + c >= 0 ? '+' : '-';
+        html += `<tr><td>${interval[0] === -Infinity ? '-∞' : interval[0]} , ${interval[1] === Infinity ? '∞' : interval[1]}</td><td>${sign}</td></tr>`;
+    });
+
+    html += '</table>';
+    resultDiv.innerHTML = html;
+}
+
+function clearAll() {
+    document.getElementById('a').value = '';
+    document.getElementById('b').value = '';
+    document.getElementById('c').value = '';
+    document.getElementById('result').innerHTML = '';
+}
+</script>
+
+</body>
+</html>

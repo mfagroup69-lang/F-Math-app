@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ملخصات الدروس و سلاسل</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Tajawal', sans-serif;
+    }
+
+    body {
+      background-color: #fff7f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 20px;
+    }
+
+    header {
+      width: 100%;
+      background-color: #ff8800;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      border-radius: 0 0 20px 20px;
+      font-size: 20px;
+      font-weight: bold;
+      position: relative;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .back-btn {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 6px 15px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .back-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 450px;
+      margin-top: 40px;
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .summary {
+      background-color: #fff3e6;
+      border: 2px solid #ff8800;
+      border-radius: 15px;
+      padding: 15px;
+      margin-bottom: 15px;
+      position: relative;
+      transition: 0.3s;
+    }
+
+    .summary:hover {
+      box-shadow: 0 2px 8px rgba(255, 136, 0, 0.3);
+    }
+
+    .summary h3 {
+      color: #ff8800;
+      margin-bottom: 5px;
+    }
+
+    .summary p {
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .arrow {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%) rotate(0deg);
+      font-size: 20px;
+      color: #ff8800;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    .arrow.open {
+      transform: translateY(-50%) rotate(180deg);
+    }
+
+    .actions {
+      display: none;
+      text-align: center;
+      margin-top: 10px;
+      animation: fade 0.3s ease-in-out;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: scaleY(0.8); }
+      to { opacity: 1; transform: scaleY(1); }
+    }
+
+    .actions button {
+      margin: 5px;
+      background-color: #ff8800;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 15px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .actions button:hover {
+      background-color: #e06f00;
+    }
+
+    footer {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .add-btn {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 25px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .add-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    ملخصات الدروس و سلاسل
+    <button class="back-btn" onclick="goBack()">رجوع</button>
+  </header>
+
+  <div class="container" id="summariesContainer">
+    <!-- ✅ هنا تضيف الملخصات الموجودة في التطبيق -->
+    <div class="summary">
+      <h3>سلسلة حول كثيرات الحدود</h3>
+      <p>إعداد: الأستاذ فصيح</p>
+      <span class="arrow" onclick="toggleActions(this)">⬇️</span>
+      <div class="actions">
+        <button onclick="viewSummary('kf.pdf')">عرض الملخص</button>
+        <button onclick="downloadSummary('kf.pdf')">تحميل الملخص</button>
+      </div>
+    </div>
+
+    <!-- ✅ أضف هنا المزيد من الملخصات متى شئت -->
+  </div>
+
+ 
+  <script>
+    function goBack() {
+      window.history.back();
+    }
+
+    function toggleActions(element) {
+      const actions = element.nextElementSibling;
+      const isOpen = actions.style.display === "block";
+      document.querySelectorAll(".actions").forEach(a => a.style.display = "none");
+      document.querySelectorAll(".arrow").forEach(a => a.classList.remove("open"));
+
+      if (!isOpen) {
+        actions.style.display = "block";
+        element.classList.add("open");
+      }
+    }
+
+    function viewSummary(filePath) {
+      // فتح الملف داخل المتصفح
+      window.open(filePath, '_blank');
+    }
+
+    function downloadSummary(filePath) {
+      // بدء تحميل الملف مباشرة
+      const a = document.createElement('a');
+      a.href = filePath;
+      a.download = filePath.split('/').pop();
+      a.click();
+    }
+
+    function addSummary() {
+      alert("📝 لإضافة ملخص جديد، انسخ بطاقة جديدة داخل div id='summariesContainer' وضع مسار الملف.");
+    }
+  </script>
+
+</body>
+</html>
